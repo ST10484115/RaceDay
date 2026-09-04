@@ -1,0 +1,40 @@
+name: RaceDay Part 1 Validation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate-project:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate required project files
+        shell: bash
+        run: |
+          echo "Checking RaceDay Part 1 files..."
+
+          test -f README.md
+          test -f .gitignore
+          test -f docs/RaceDay_ERD.png
+          test -f docs/RaceDay_ERD.drawio
+          test -f docs/API_Endpoint_Plan.md
+          test -f docs/RaceDay_Database.sql
+
+          echo "All required RaceDay Part 1 files are present."
+
+      - name: Validate documentation folder
+        shell: bash
+        run: |
+          test -d docs
+          echo "Documentation folder exists."
+
+      - name: Validation successful
+        run: echo "RaceDay Part 1 repository validation completed successfully."
