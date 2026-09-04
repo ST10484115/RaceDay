@@ -197,6 +197,41 @@ Testing will include:
 
 ---
 
+## CI/CD Validation
+
+GitHub Actions is used to validate the RaceDay Part 1 repository structure and required documentation.
+
+The workflow checks that the required Part 1 documentation is present, including the `/docs` folder and its required files. A successful green check confirms that the validation workflow completed successfully.
+
+### GitHub Actions Validation Result
+
+![GitHub Actions Validation](docs/GitHub_Actions.png)
+
+The successful workflow run demonstrates that the RaceDay repository passed the Part 1 validation checks on the `main` branch.
+
+---
+
+## Part 1 Documentation
+
+The following planning and database documentation has been completed for Part 1:
+
+- **ERD:** `docs/RaceDay_ERD.png`
+- **ERD Source:** `docs/RaceDay_ERD.drawio`
+- **API Endpoint Plan:** `docs/API_Endpoint_Plan.md`
+- **SQL Server Database Script:** `docs/RaceDay_Database.sql`
+
+These documents provide the database structure, API planning and SQL Server implementation required before development of the REST API in Part 2.
+
+---
+
+## YouTube Demonstration
+
+Part 1 demonstration video:
+
+**YouTube Link:** [To be added before submission]
+
+The video will provide a voice-over demonstration of the completed Part 1 planning documentation, database design, API endpoint plan and GitHub Actions validation.
+
 ## Project Structure
 
 ```text
