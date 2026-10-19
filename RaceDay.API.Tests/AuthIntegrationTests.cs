@@ -2,23 +2,35 @@
 using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using RaceDay.API.Data;
 using RaceDay.API.DTOs;
+using RaceDay.API.Models;
 
 namespace RaceDay.API.Tests;
 
 public class AuthIntegrationTests
     : IClassFixture<CustomWebApplicationFactory>
 {
+    private readonly CustomWebApplicationFactory _factory;
     private readonly HttpClient _client;
 
     public AuthIntegrationTests(
         CustomWebApplicationFactory factory)
     {
-        _client = factory.CreateClient(
+        _factory = factory;
+
+        _client = _factory.CreateClient(
             new WebApplicationFactoryClientOptions
             {
                 AllowAutoRedirect = false
             });
+    }
+
+    private IServiceScope FactoryServices()
+    {
+        return _factory.Services.CreateScope();
     }
 
     [Fact]
@@ -95,39 +107,37 @@ public class AuthIntegrationTests
         Assert.Equal(
             HttpStatusCode.Created, registerResponse.StatusCode);
 
-        var loginRequest = new LoginRequest
-        {
-            Email = email,
-            Password = "WrongPassword2026!"
-        };
-
         var loginResponse = await _client.PostAsJsonAsync(
-            "/api/Auth/login", loginRequest);
+            "/api/Auth/login",
+            new LoginRequest
+            {
+                Email = email,
+                Password = "WrongPassword2026!"
+            });
 
         Assert.Equal(
             HttpStatusCode.Unauthorized, loginResponse.StatusCode);
     }
 
-
     [Fact]
-    public async Task Login_WithValidCredentials_ReturnsSuccessAndAllowsProfileAccess()
+    public async Task Login_WithValidCredentials_AllowsProfileAccess()
     {
         var email = $"valid-login-{Guid.NewGuid():N}@example.com";
         const string password = "RaceDayTest2026!";
 
-        var registration = new RegisterRequest
-        {
-            FirstName = "Login",
-            LastName = "Tester",
-            Email = email,
-            Password = password,
-            Role = "Participant"
-        };
-
         var registerResponse = await _client.PostAsJsonAsync(
-            "/api/Auth/register", registration);
+            "/api/Auth/register",
+            new RegisterRequest
+            {
+                FirstName = "Login",
+                LastName = "Tester",
+                Email = email,
+                Password = password,
+                Role = "Participant"
+            });
 
-        Assert.Equal(HttpStatusCode.Created, registerResponse.StatusCode);
+        Assert.Equal(
+            HttpStatusCode.Created, registerResponse.StatusCode);
 
         var loginResponse = await _client.PostAsJsonAsync(
             "/api/Auth/login",
@@ -156,9 +166,9 @@ public class AuthIntegrationTests
     {
         var response = await _client.GetAsync("/api/Auth/me");
 
-        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.Equal(
+            HttpStatusCode.Unauthorized, response.StatusCode);
     }
-
 
     [Fact]
     public async Task Participant_CannotCreateEvent_ReturnsForbidden()
@@ -166,19 +176,19 @@ public class AuthIntegrationTests
         var email = $"participant-{Guid.NewGuid():N}@example.com";
         const string password = "RaceDayTest2026!";
 
-        var registration = new RegisterRequest
-        {
-            FirstName = "Test",
-            LastName = "Participant",
-            Email = email,
-            Password = password,
-            Role = "Participant"
-        };
-
         var registerResponse = await _client.PostAsJsonAsync(
-            "/api/Auth/register", registration);
+            "/api/Auth/register",
+            new RegisterRequest
+            {
+                FirstName = "Test",
+                LastName = "Participant",
+                Email = email,
+                Password = password,
+                Role = "Participant"
+            });
 
-        Assert.Equal(HttpStatusCode.Created, registerResponse.StatusCode);
+        Assert.Equal(
+            HttpStatusCode.Created, registerResponse.StatusCode);
 
         var loginResponse = await _client.PostAsJsonAsync(
             "/api/Auth/login",
@@ -204,8 +214,76 @@ public class AuthIntegrationTests
         var response = await _client.PostAsJsonAsync(
             "/api/Events", eventRequest);
 
-        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Equal(
+            HttpStatusCode.Forbidden, response.StatusCode);
     }
 
+    [Fact]
+    public async Task Organiser_CanCreateEvent_WhenLocationExists()
+    {
+        var email = $"organiser-{Guid.NewGuid():N}@example.com";
+        const string password = "RaceDayTest2026!";
 
+        var registerResponse = await _client.PostAsJsonAsync(
+            "/api/Auth/register",
+            new RegisterRequest
+            {
+                FirstName = "Test",
+                LastName = "Organiser",
+                Email = email,
+                Password = password,
+                Role = "Organiser"
+            });
+
+        Assert.Equal(
+            HttpStatusCode.Created, registerResponse.StatusCode);
+
+        var loginResponse = await _client.PostAsJsonAsync(
+            "/api/Auth/login",
+            new LoginRequest
+            {
+                Email = email,
+                Password = password
+            });
+
+        Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
+
+        int locationId;
+
+        using (var scope = FactoryServices())
+        {
+            var db = scope.ServiceProvider
+                .GetRequiredService<RaceDayDbContext>();
+
+            var location = new EventLocation
+            {
+                LocationName = "Test Stadium",
+                Address = "1 Test Street",
+                City = "Gqeberha",
+                Province = "Eastern Cape"
+            };
+
+            db.EventLocations.Add(location);
+            await db.SaveChangesAsync();
+
+            locationId = location.LocationId;
+        }
+
+        var eventRequest = new
+        {
+            eventName = "Test Race",
+            description = "Integration test event",
+            eventDate = DateTime.UtcNow.AddDays(30),
+            locationId,
+            distanceKm = 5.0,
+            eventType = "Run",
+            status = "Upcoming"
+        };
+
+        var response = await _client.PostAsJsonAsync(
+            "/api/Events", eventRequest);
+
+        Assert.Equal(
+            HttpStatusCode.Created, response.StatusCode);
+    }
 }
