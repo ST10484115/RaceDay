@@ -107,4 +107,105 @@ public class AuthIntegrationTests
         Assert.Equal(
             HttpStatusCode.Unauthorized, loginResponse.StatusCode);
     }
+
+
+    [Fact]
+    public async Task Login_WithValidCredentials_ReturnsSuccessAndAllowsProfileAccess()
+    {
+        var email = $"valid-login-{Guid.NewGuid():N}@example.com";
+        const string password = "RaceDayTest2026!";
+
+        var registration = new RegisterRequest
+        {
+            FirstName = "Login",
+            LastName = "Tester",
+            Email = email,
+            Password = password,
+            Role = "Participant"
+        };
+
+        var registerResponse = await _client.PostAsJsonAsync(
+            "/api/Auth/register", registration);
+
+        Assert.Equal(HttpStatusCode.Created, registerResponse.StatusCode);
+
+        var loginResponse = await _client.PostAsJsonAsync(
+            "/api/Auth/login",
+            new LoginRequest
+            {
+                Email = email,
+                Password = password
+            });
+
+        Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
+
+        var profileResponse = await _client.GetAsync("/api/Auth/me");
+
+        Assert.Equal(HttpStatusCode.OK, profileResponse.StatusCode);
+
+        var profile = await profileResponse.Content
+            .ReadFromJsonAsync<AuthResponse>();
+
+        Assert.NotNull(profile);
+        Assert.Equal(email, profile.Email);
+        Assert.Equal("Participant", profile.Role);
+    }
+
+    [Fact]
+    public async Task GetMyProfile_WithoutLogin_ReturnsUnauthorized()
+    {
+        var response = await _client.GetAsync("/api/Auth/me");
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+    }
+
+
+    [Fact]
+    public async Task Participant_CannotCreateEvent_ReturnsForbidden()
+    {
+        var email = $"participant-{Guid.NewGuid():N}@example.com";
+        const string password = "RaceDayTest2026!";
+
+        var registration = new RegisterRequest
+        {
+            FirstName = "Test",
+            LastName = "Participant",
+            Email = email,
+            Password = password,
+            Role = "Participant"
+        };
+
+        var registerResponse = await _client.PostAsJsonAsync(
+            "/api/Auth/register", registration);
+
+        Assert.Equal(HttpStatusCode.Created, registerResponse.StatusCode);
+
+        var loginResponse = await _client.PostAsJsonAsync(
+            "/api/Auth/login",
+            new LoginRequest
+            {
+                Email = email,
+                Password = password
+            });
+
+        Assert.Equal(HttpStatusCode.OK, loginResponse.StatusCode);
+
+        var eventRequest = new
+        {
+            eventName = "Test Race",
+            description = "Authorization test",
+            eventDate = DateTime.UtcNow.AddDays(30),
+            locationId = 1,
+            distanceKm = 5.0,
+            eventType = "Run",
+            status = "Upcoming"
+        };
+
+        var response = await _client.PostAsJsonAsync(
+            "/api/Events", eventRequest);
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
+
+
 }
