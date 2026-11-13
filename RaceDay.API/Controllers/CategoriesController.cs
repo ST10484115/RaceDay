@@ -42,6 +42,7 @@ namespace RaceDay.API.Controllers
                     c.CategoryId,
                     c.EventId,
                     c.CategoryName,
+                    c.AgeGroup,
                     c.DistanceKm,
                     c.EntryFee
                 })
@@ -63,6 +64,7 @@ namespace RaceDay.API.Controllers
                     c.CategoryId,
                     c.EventId,
                     c.CategoryName,
+                    c.AgeGroup,
                     c.DistanceKm,
                     c.EntryFee
                 })
@@ -116,6 +118,7 @@ namespace RaceDay.API.Controllers
             {
                 EventId = eventId,
                 CategoryName = request.CategoryName.Trim(),
+                AgeGroup = request.AgeGroup.Trim(),
                 DistanceKm = request.DistanceKm,
                 EntryFee = request.EntryFee
             };
@@ -131,6 +134,7 @@ namespace RaceDay.API.Controllers
                     category.CategoryId,
                     category.EventId,
                     category.CategoryName,
+                    category.AgeGroup,
                     category.DistanceKm,
                     category.EntryFee,
                     message = "Category created successfully."
@@ -174,6 +178,7 @@ namespace RaceDay.API.Controllers
             }
 
             category.CategoryName = request.CategoryName.Trim();
+            category.AgeGroup = request.AgeGroup.Trim();
             category.DistanceKm = request.DistanceKm;
             category.EntryFee = request.EntryFee;
 
@@ -184,6 +189,7 @@ namespace RaceDay.API.Controllers
                 category.CategoryId,
                 category.EventId,
                 category.CategoryName,
+                category.AgeGroup,
                 category.DistanceKm,
                 category.EntryFee,
                 message = "Category updated successfully."

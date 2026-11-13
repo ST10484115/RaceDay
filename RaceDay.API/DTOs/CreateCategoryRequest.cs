@@ -9,6 +9,10 @@ namespace RaceDay.API.DTOs
         [StringLength(100, MinimumLength = 2)]
         public string CategoryName { get; set; } = string.Empty;
 
+        [Required]
+        [StringLength(50)]
+        public string AgeGroup { get; set; } = "All Ages";
+
         [Range(0.01, 9999.99)]
         public decimal DistanceKm { get; set; }
 

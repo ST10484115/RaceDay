@@ -87,22 +87,38 @@ namespace RaceDay.API.Data
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
+
             // CATEGORIES
             modelBuilder.Entity<Category>(entity =>
             {
                 entity.ToTable(t =>
-                    t.HasCheckConstraint("CK_Categories_DistanceKm", "[DistanceKm] > 0"));
+                    t.HasCheckConstraint(
+                        "CK_Categories_DistanceKm",
+                        "[DistanceKm] > 0"));
 
                 entity.HasKey(c => c.CategoryId);
-                entity.Property(c => c.CategoryName).IsRequired().HasMaxLength(100);
-                entity.Property(c => c.DistanceKm).HasColumnType("decimal(6,2)");
-                entity.Property(c => c.EntryFee).HasColumnType("decimal(10,2)");
+
+                entity.Property(c => c.CategoryName)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(c => c.AgeGroup)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasDefaultValue("All Ages");
+
+                entity.Property(c => c.DistanceKm)
+                    .HasColumnType("decimal(6,2)");
+
+                entity.Property(c => c.EntryFee)
+                    .HasColumnType("decimal(10,2)");
 
                 entity.HasOne(c => c.Event)
                     .WithMany(e => e.Categories)
                     .HasForeignKey(c => c.EventId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
+
 
             // ENROLMENTS
             modelBuilder.Entity<Enrolment>(entity =>

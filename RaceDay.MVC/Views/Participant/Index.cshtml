@@ -1,0 +1,50 @@
+﻿@{
+    ViewData["Title"] = "Participant Dashboard";
+}
+
+<div class="container py-5">
+    <div class="mb-4">
+        <h1 class="fw-bold">Welcome to RaceDay, @ViewBag.UserName!</h1>
+        <p class="text-muted">
+            Discover events, enter races and track your performance.
+        </p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold">Upcoming Events</h5>
+                    <p class="text-muted">
+                        Explore upcoming races and find your next challenge.
+                    </p>
+                    <a href="#" class="btn btn-dark">Browse Events</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold">My Enrolments</h5>
+                    <p class="text-muted">
+                        View your registered races and enrolment statuses.
+                    </p>
+                    <a href="#" class="btn btn-dark">My Enrolments</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h5 class="fw-bold">My Results</h5>
+                    <p class="text-muted">
+                        Review your race history, finishing times and positions.
+                    </p>
+                    <a href="#" class="btn btn-dark">View Results</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
